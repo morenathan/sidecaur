@@ -1,0 +1,27 @@
+#!/bin/bash
+PATH=$HOME/.local/bin/scripting-tools:$PATH
+source debug
+
+PKGSRCDIR=/home/packager
+
+declare -a pkgs opts
+for i in "$@"; do
+	case "$i" in
+	-*)	opts+=("$i") ;;
+	*)	pkgs+=("$i") ;;
+	esac
+done
+
+function download { git clone "https://aur.archlinux.org/${1}.git" "${1}"; }
+
+pushd "$PKGSRCDIR"
+for pkg in ${pkgs[*]}; do
+	download "$pkg" || {
+		rm -r "$pkg"
+		exit 1
+	}
+done
+popd
+
+pushd "$PKGSRCDIR/${pkgs[0]}"
+echo "Ready to build."
